@@ -1,0 +1,112 @@
+#!/bin/bash
+
+# Name: PassGen
+# Description: Generates a unique password based on the provided key
+#              and a master key, stored in the configuration file.
+# Created on: 07-03-2017
+# Last Modified: 10-03-2017
+# Author: Adam "simba" Szczerbiak (szczerbiakadam@gmail.com)
+
+
+DEFAULT_PASS_LENGTH=16
+SCRIPT_NAME=$(basename ${0})
+KEY_FILE_LOCATION="$HOME/.config/$SCRIPT_NAME/masterkey"
+
+function print_help
+{
+  printf "$SCRIPT_NAME - generates unique passwords for various entries.\n\n"
+  printf "usage:\n"
+  printf "\t$SCRIPT_NAME target [-l|--length N] [-k|--key K]\n"
+  printf "options:\n"
+  printf "\t-h  --help     print this help message and exit\n"
+  printf "\t-l  --length   length of the password in range <1, 18> (default: 16)\n"
+  printf "\t-k  --key      use the provided key instead of a master key\n\n"
+}
+
+function create_key_file
+{
+  local masterkey=""
+  printf "Please provide the master key: "
+  read masterkey
+  while [ -z "$masterkey" ]; do
+    printf "The key must not be empty. Please provide the master key: "
+    read masterkey
+  done
+
+  local confdir=$(dirname "$KEY_FILE_LOCATION")
+  if [ ! -d "$confdir" ]; then
+    printf "Creating the directory: [$confdir]: "
+    mkdir -p "$confdir"
+    printf "done.\n"
+  fi
+
+  printf "$masterkey" > "$KEY_FILE_LOCATION"
+  printf "Saved the master key.\n"
+}
+
+if [ ! -f "$KEY_FILE_LOCATION" ]; then
+  create_key_file
+fi
+
+DEFAULT_KEY=$(<"$KEY_FILE_LOCATION")
+
+target=""
+pass_length="$DEFAULT_PASS_LENGTH"
+key="$DEFAULT_KEY"
+
+while [[ $# -gt 0 ]]; do
+  param="$1"
+
+  case $param in
+    -h|--help)
+      print_help
+      exit 0
+    ;;
+    -l|--length)
+      pass_length="$2"
+      shift
+    ;;
+    -k|--key)
+      key="$2"
+      shift
+    ;;
+    *)
+      target="$1"
+    ;;
+  esac
+
+  shift
+done
+
+# Fails gracefully if no target has been specified:
+if [ -z "$target" ]; then
+  print_help
+  printf "Please specify a target!\n"
+  exit 1
+fi
+
+# Fails gracefully if the key-length is not a valid number:
+regex='^[0-9]+$'
+if ! [[ "$pass_length" =~ $regex ]]; then
+  print_help
+  printf "Error: $pass_length is not a valid number!\n"
+  exit 1
+fi
+if ! [[ "$pass_length" -gt 0 && "$pass_length" -lt 19 ]]; then
+  print_help
+  printf "Error: $pass_length is outside the valid range!\n"
+  exit 1
+fi
+
+printf "Generating a password for target [$target]\n"
+
+# Generates a hashed string, then builds an answer consisting of characters
+# whose indexes are consecutive primes (i.e. 2, 3, 5, 7, ..., 57, 61).
+hashed="$(printf "${key}${target}" | sha256sum)"
+answer="${hashed:1:1}\
+${hashed:2:1}${hashed:4:1}${hashed:6:1}${hashed:10:1}${hashed:12:1}\
+${hashed:16:1}${hashed:18:1}${hashed:22:1}${hashed:28:1}${hashed:30:1}\
+${hashed:36:1}${hashed:40:1}${hashed:42:1}${hashed:46:1}${hashed:52:1}\
+${hashed:58:1}${hashed:60:1}"
+
+printf "${answer:0:$pass_length}\n"
