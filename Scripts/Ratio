@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# Name: Ratio
+# Description: Finds the GCD of two numbers x, y provided as arguments,
+#              then prints out (x/GCD, y/GCD).
+#              Useful for calculating the ratio of displays.
+# Invocation:
+#   Ratio x y, where x and y are positive integer numbers, both mandatory.
+# Example:
+#   Ratio 1280 720 --> prints out: 16:9
+# Author: Adam Szczerbiak (szczerbiakadam@gmail.com)
+# License: MIT
+
+if [ $# -lt 2 ]; then
+  printf "%s %d %s\n" \
+      "Error: At least 2 parameters required," "$#" "provided. Aborting."
+  exit 1
+fi
+
+function CalculateGCD
+{
+  higher="${1}"
+  lower="${2}"
+  if [ "${higher}" -lt "${lower}" ]; then
+    temp="${lower}"
+    lower="${higher}"
+    higher="${temp}"
+  fi
+
+  while [ "${lower}" -ne 0 ]; do
+    temp="${lower}"
+    lower="$((${higher} % ${temp}))"
+    higher="${temp}"
+  done
+
+  echo "${higher}" # as $higher now contains the GCD of both arguments.
+}
+
+args="${@}"
+GCD="${1}"
+shift # past first value, already in $GCD
+
+
+for arg in "${@}"; do
+  temp="$( CalculateGCD "${arg}" "${GCD}" )"
+  GCD="${temp}"
+done
+
+set -- ${args}
+
+# Prints out the first reduced element:
+reduced1="$(( "${1}" / "${GCD}" ))"
+shift # past reduced1 value
+printf "%d" "${reduced1}"
+
+# Prints out all the other reduced elements:
+for arg in "${@}"; do
+  reduced="$(( "${arg}" / "${GCD}" ))"
+  printf ":%d" "${reduced}"
+done
+
+printf " (scale factor: %d)\n" "${GCD}"
