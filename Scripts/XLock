@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+# Options:
+# -background/-foreground: specifies a background and foreground color.
+# -mousemotion: any mouse motion brings about the password window.
+# +description: does NOT show the description.
+# -mode blank: does not display any screensaver, just a blank screen.
+# -timeout N: the password screen times out after this number of seconds.
+# +sound: does NOT block the sound server's output.
+# -timeelapsed: displays lockout time in minutes.
+# -usefirst: includes the first keystroke in the grabbed password.
+# -font/planfont: specifies the font to use in the prompt/lower screen.
+# -username: the text shown right before the username.
+# -password: the text shown right before the password input.
+# -info: the text showing an informational message telling the user what to do.
+# -icongeometry: specifies the geometry of the user icon.
+
+xlock -background black -foreground "#268bd2" \
+      -mousemotion \
+      +description \
+      -mode blank \
+      -timeout 6 \
+      +sound \
+      -timeelapsed \
+      -usefirst \
+      -font     '-adobe-helvetica-bold-r-normal-*-*-100-*-*-*-*-*-*' \
+      -planfont '-adobe-helvetica-bold-r-normal-*-*-110-*-*-*-*-*-*' \
+      -username " " \
+      -password " " \
+      -info " " \
+      -icongeometry "0x0"
+
