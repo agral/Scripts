@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Name:          GCD
+# Description:   Calculates and prints the greatest common divisor of a set
+#                of positive integer numbers provided as consecutive arguments.
+# Options:       None
+# Created on:    13-02-2018
+# Last modified: 13-02-2018
+# Author:        Adam Szczerbiak, szczerbiakadam@gmail.com
+# License:       MIT
+
+
+SCRIPT_NAME="GCD"
+
+function usage
+{
+  printf "%s - %s\n" "${SCRIPT_NAME}" \
+      "calculate and print the greatest common divisor of a set of numbers."
+  printf "  %s\n" "Usage:"
+  printf "    %s %s\n" "${SCRIPT_NAME}" "args"
+  printf "  %s\n" "where each argument in args is a positive integer."
+  printf "  %s\n" "At least one argument needs to be provided."
+  printf "  %s\n" "Example invocation:"
+  printf "    %s %s\n" "${SCRIPT_NAME}" "42 36"
+  printf "  %s\n" "Author: Adam Szczerbiak (szczerbiakadam@gmail.com)"
+}
+
+function GCD
+{
+  smaller="${1}"
+  bigger="${2}"
+  if [ "${smaller}" -gt "${bigger}" ]; then
+    temp="${smaller}"
+    smaller="${bigger}"
+    bigger="${temp}"
+  fi
+
+  while [ "${smaller}" -gt 0 ]; do
+    temp="${smaller}"
+    smaller="$(( "${bigger}" % "${temp}" ))"
+    bigger="${temp}"
+  done
+
+  echo "${bigger}"
+}
+
+if [ "${#}" -lt 1 ]; then
+  usage
+  printf "\n%s\n" "Error: No arguments have been provided. Aborting."
+  exit 1
+fi
+
+result="${1}"
+shift
+
+while [ "${#}" -gt 0 ]; do
+  new_result="$( GCD ${result} ${1} )"
+  result="${new_result}"
+  shift
+done
+echo "${result}"
