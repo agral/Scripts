@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Name:          git-whoami
+# Description:   Tells you who you are (in a Git repository)
+# Options:       None
+# Created on:    13-02-2018
+# Last modified: 13-02-2018
+# Author:        Adam Szczerbiak, szczerbiakadam@gmail.com
+# License:       MIT
+
+
+USER="$( git config user.name )"
+MAIL="$( git config user.email )"
+
+printf "$USER <$MAIL>\n"
